@@ -18,6 +18,7 @@ import {
   Legend,
 } from 'recharts';
 import { analyticsService } from '../services/finance';
+import { useTheme } from '../context/ThemeContext';
 import toast from 'react-hot-toast';
 
 const Reports = () => {
@@ -25,6 +26,7 @@ const Reports = () => {
   const [trends, setTrends] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState('');
   const [monthlyData, setMonthlyData] = useState(null);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     fetchTrends();
@@ -100,7 +102,7 @@ Report Date: ${new Date().toLocaleDateString()}
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -110,12 +112,12 @@ Report Date: ${new Date().toLocaleDateString()}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Financial Reports</h2>
-          <p className="text-gray-500">Review your financial history and trends</p>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Financial Reports</h2>
+          <p className="text-gray-500 dark:text-gray-400">Review your financial history and trends</p>
         </div>
         <button
           onClick={generatePDFReport}
-          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
+          className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition font-medium"
         >
           <Download className="w-5 h-5" />
           Download Report
@@ -123,20 +125,20 @@ Report Date: ${new Date().toLocaleDateString()}
       </div>
 
       {/* Month Selector */}
-      <div className="bg-white rounded-xl shadow-sm border p-6">
+      <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Calendar className="w-5 h-5 text-gray-500" />
-          <h3 className="text-lg font-semibold text-gray-800">Select Month</h3>
+          <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Select Month</h3>
         </div>
         <div className="flex flex-wrap gap-2">
           {trends.map((trend) => (
             <button
               key={trend.month}
               onClick={() => handleMonthChange(trend.month)}
-              className={`px-4 py-2 rounded-lg transition ${
+              className={`px-4 py-2 rounded-xl transition font-medium ${
                 selectedMonth === trend.month
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-600'
               }`}
             >
               {trend.monthName}
@@ -148,47 +150,47 @@ Report Date: ${new Date().toLocaleDateString()}
       {/* Monthly Summary */}
       {monthlyData && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-green-600" />
+          <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-green-500" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Total Income</p>
-                <p className="text-2xl font-bold text-gray-800">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Income</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-white">
                   ${monthlyData.income.toLocaleString()}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                <TrendingDown className="w-5 h-5 text-red-600" />
+          <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center">
+                <TrendingDown className="w-6 h-6 text-red-500" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Total Expenses</p>
-                <p className="text-2xl font-bold text-gray-800">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Expenses</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-white">
                   ${monthlyData.expense.toLocaleString()}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                monthlyData.savings >= 0 ? 'bg-blue-100' : 'bg-red-100'
+          <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+            <div className="flex items-center gap-3">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                monthlyData.savings >= 0 ? 'bg-primary-500/10' : 'bg-red-500/10'
               }`}>
-                <PieChart className={`w-5 h-5 ${
-                  monthlyData.savings >= 0 ? 'text-blue-600' : 'text-red-600'
+                <PieChart className={`w-6 h-6 ${
+                  monthlyData.savings >= 0 ? 'text-primary-500' : 'text-red-500'
                 }`} />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Net Savings</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Net Savings</p>
                 <p className={`text-2xl font-bold ${
-                  monthlyData.savings >= 0 ? 'text-gray-800' : 'text-red-600'
+                  monthlyData.savings >= 0 ? 'text-gray-800 dark:text-white' : 'text-red-500'
                 }`}>
                   ${monthlyData.savings.toLocaleString()}
                 </p>
@@ -199,68 +201,69 @@ Report Date: ${new Date().toLocaleDateString()}
       )}
 
       {/* Trends Chart */}
-      <div className="bg-white rounded-xl shadow-sm border p-6">
+      <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
         <div className="flex items-center gap-2 mb-6">
-          <FileText className="w-5 h-5 text-gray-500" />
-          <h3 className="text-lg font-semibold text-gray-800">Income vs Expenses Trend</h3>
+          <FileText className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Income vs Expenses Trend</h3>
         </div>
         
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={trends}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey="monthName" stroke="#64748b" fontSize={12} />
-            <YAxis stroke="#64748b" fontSize={12} />
+            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#252f4a' : '#f1f5f9'} />
+            <XAxis dataKey="monthName" stroke={isDark ? '#9ca3af' : '#64748b'} fontSize={12} />
+            <YAxis stroke={isDark ? '#9ca3af' : '#64748b'} fontSize={12} />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#fff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
+                backgroundColor: isDark ? '#1a2236' : '#fff',
+                border: `1px solid ${isDark ? '#252f4a' : '#e2e8f0'}`,
+                borderRadius: '12px',
+                color: isDark ? '#fff' : '#000',
               }}
               formatter={(value) => [`$${value.toLocaleString()}`, '']}
             />
             <Legend />
-            <Bar dataKey="income" name="Income" fill="#22c55e" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="expense" name="Expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="income" name="Income" fill="#22c55e" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="expense" name="Expenses" fill="#ef4444" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {/* Savings Trend */}
-      <div className="bg-white rounded-xl shadow-sm border p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-6">Monthly Savings</h3>
+      <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-6">Monthly Savings</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b">
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Month</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Income</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Expenses</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Savings</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Rate</th>
+              <tr className="border-b border-gray-200 dark:border-dark-700">
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">Month</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">Income</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">Expenses</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">Savings</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400">Rate</th>
               </tr>
             </thead>
             <tbody>
               {trends.slice().reverse().map((trend) => (
-                <tr key={trend.month} className="border-b hover:bg-gray-50">
-                  <td className="py-3 px-4 font-medium text-gray-800">{trend.monthName}</td>
-                  <td className="py-3 px-4 text-right text-green-600">
+                <tr key={trend.month} className="border-b border-gray-200 dark:border-dark-700 hover:bg-gray-50 dark:hover:bg-dark-700/50 transition">
+                  <td className="py-3 px-4 font-medium text-gray-800 dark:text-white">{trend.monthName}</td>
+                  <td className="py-3 px-4 text-right text-green-500">
                     ${trend.income.toLocaleString()}
                   </td>
-                  <td className="py-3 px-4 text-right text-red-600">
+                  <td className="py-3 px-4 text-right text-red-500">
                     ${trend.expense.toLocaleString()}
                   </td>
                   <td className={`py-3 px-4 text-right font-medium ${
-                    trend.savings >= 0 ? 'text-blue-600' : 'text-red-600'
+                    trend.savings >= 0 ? 'text-primary-500' : 'text-red-500'
                   }`}>
                     ${trend.savings.toLocaleString()}
                   </td>
                   <td className="py-3 px-4 text-right">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       trend.income > 0 && (trend.savings / trend.income) >= 0.2
-                        ? 'bg-green-100 text-green-700'
+                        ? 'bg-green-500/10 text-green-500'
                         : trend.income > 0 && (trend.savings / trend.income) >= 0
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-red-100 text-red-700'
+                        ? 'bg-yellow-500/10 text-yellow-500'
+                        : 'bg-red-500/10 text-red-500'
                     }`}>
                       {trend.income > 0
                         ? `${Math.round((trend.savings / trend.income) * 100)}%`

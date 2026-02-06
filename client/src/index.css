@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,26 +10,55 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #f8fafc;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Light mode default */
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+/* Dark mode */
+body.dark {
+  @apply bg-dark-900 text-white;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  @apply bg-gray-300 dark:bg-dark-500 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  @apply bg-gray-400 dark:bg-dark-400;
+}
+
+/* Card glass effect for dark mode */
+.glass-card {
+  @apply bg-white dark:bg-dark-700/50 backdrop-blur-xl border border-gray-200 dark:border-dark-600;
+}
+
+/* Gradient text */
+.gradient-text {
+  @apply bg-gradient-to-r from-primary-500 to-primary-400 bg-clip-text text-transparent;
+}
+
+/* Chart container responsiveness */
+.recharts-responsive-container {
+  min-height: 200px;
 }

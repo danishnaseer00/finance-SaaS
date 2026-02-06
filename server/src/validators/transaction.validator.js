@@ -14,11 +14,14 @@ const transactionSchema = z.object({
 
 const transactionUpdateSchema = transactionSchema.partial();
 
+// Helper to transform empty strings to undefined
+const emptyToUndefined = z.literal('').transform(() => undefined);
+
 const transactionFilterSchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  type: z.enum(['INCOME', 'EXPENSE']).optional(),
-  category: z.string().optional(),
+  type: z.enum(['INCOME', 'EXPENSE']).optional().or(emptyToUndefined),
+  category: z.string().optional().or(emptyToUndefined).transform(val => val === '' ? undefined : val),
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(20),
 });
