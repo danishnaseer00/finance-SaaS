@@ -1,0 +1,87 @@
+// Prisma schema for FinSense
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  transactions      Transaction[]
+  financialSummaries FinancialSummary[]
+  aiInsights        AIInsight[]
+
+  @@map("users")
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  amount    Decimal  @db.Decimal(12, 2)
+  type      TransactionType
+  category  String
+  date      DateTime
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date])
+  @@index([category])
+  @@map("transactions")
+}
+
+model FinancialSummary {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  month        DateTime // First day of the month
+  totalIncome  Decimal  @default(0) @map("total_income") @db.Decimal(12, 2)
+  totalExpense Decimal  @default(0) @map("total_expense") @db.Decimal(12, 2)
+  savingsRate  Decimal  @default(0) @map("savings_rate") @db.Decimal(5, 2)
+  healthScore  Int      @default(0) @map("health_score") // 0-100
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month])
+  @@index([userId])
+  @@map("financial_summaries")
+}
+
+model AIInsight {
+  id        String      @id @default(uuid())
+  userId    String      @map("user_id")
+  type      InsightType
+  content   String      @db.Text
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("ai_insights")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum InsightType {
+  CHAT
+  AUTO
+  BUDGET
+}
