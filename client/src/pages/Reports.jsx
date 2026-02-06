@@ -36,10 +36,14 @@ const Reports = () => {
     try {
       setLoading(true);
       const response = await analyticsService.getTrends(12);
-      setTrends(response.data.trends);
+      // Filter out months with no transactions
+      const monthsWithData = response.data.trends.filter(
+        (t) => t.income > 0 || t.expense > 0
+      );
+      setTrends(monthsWithData);
       
-      if (response.data.trends.length > 0) {
-        const latest = response.data.trends[response.data.trends.length - 1];
+      if (monthsWithData.length > 0) {
+        const latest = monthsWithData[monthsWithData.length - 1];
         setSelectedMonth(latest.month);
         setMonthlyData(latest);
       }
@@ -112,7 +116,7 @@ Report Date: ${new Date().toLocaleDateString()}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Financial Reports</h2>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Financial History</h2>
           <p className="text-gray-500 dark:text-gray-400">Review your financial history and trends</p>
         </div>
         <button
@@ -130,21 +134,27 @@ Report Date: ${new Date().toLocaleDateString()}
           <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Select Month</h3>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {trends.map((trend) => (
-            <button
-              key={trend.month}
-              onClick={() => handleMonthChange(trend.month)}
-              className={`px-4 py-2 rounded-xl transition font-medium ${
-                selectedMonth === trend.month
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-600'
-              }`}
-            >
-              {trend.monthName}
-            </button>
-          ))}
-        </div>
+        {trends.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {trends.map((trend) => (
+              <button
+                key={trend.month}
+                onClick={() => handleMonthChange(trend.month)}
+                className={`px-4 py-2 rounded-xl transition font-medium ${
+                  selectedMonth === trend.month
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-600'
+                }`}
+              >
+                {trend.monthName}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+            No transaction history found. Start adding transactions to see your financial history here.
+          </p>
+        )}
       </div>
 
       {/* Monthly Summary */}

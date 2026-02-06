@@ -9,6 +9,15 @@ export const transactionService = {
   getCategories: () => api.get('/transactions/categories'),
 };
 
+export const accountService = {
+  getAll: (params = {}) => api.get('/accounts', { params }),
+  getById: (id) => api.get(`/accounts/${id}`),
+  create: (data) => api.post('/accounts', data),
+  update: (id, data) => api.put(`/accounts/${id}`, data),
+  toggleArchive: (id) => api.patch(`/accounts/${id}/toggle-archive`),
+  delete: (id) => api.delete(`/accounts/${id}`),
+};
+
 export const analyticsService = {
   getDashboard: () => api.get('/analytics/dashboard'),
   getSnapshot: () => api.get('/analytics/snapshot'),

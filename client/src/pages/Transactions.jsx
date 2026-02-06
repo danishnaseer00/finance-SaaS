@@ -10,9 +10,22 @@ import {
   ArrowDownCircle,
   Calendar,
   ChevronDown,
+  Wallet,
+  Building2,
+  CreditCard,
+  PiggyBank,
+  Smartphone,
 } from 'lucide-react';
-import { transactionService } from '../services/finance';
+import { transactionService, accountService } from '../services/finance';
 import toast from 'react-hot-toast';
+
+const ACCOUNT_TYPE_ICONS = {
+  CASH: Wallet,
+  BANK: Building2,
+  CREDIT_CARD: CreditCard,
+  SAVINGS: PiggyBank,
+  WALLET: Smartphone,
+};
 
 const CATEGORIES = {
   income: ['Salary', 'Freelance', 'Investments', 'Bonus', 'Other Income'],
@@ -46,17 +59,29 @@ const Transactions = () => {
   // Modal
   const [showModal, setShowModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
+  const [accounts, setAccounts] = useState([]);
   const [formData, setFormData] = useState({
     amount: '',
     type: 'EXPENSE',
     category: '',
     date: new Date().toISOString().split('T')[0],
     notes: '',
+    accountId: '',
   });
 
   useEffect(() => {
     fetchTransactions();
+    fetchAccounts();
   }, [pagination.page, filters]);
+
+  const fetchAccounts = async () => {
+    try {
+      const response = await accountService.getAll({ status: 'ACTIVE' });
+      setAccounts(response.data.accounts || []);
+    } catch (error) {
+      console.error('Failed to load accounts', error);
+    }
+  };
 
   const fetchTransactions = async () => {
     try {
@@ -81,6 +106,7 @@ const Transactions = () => {
       const data = {
         ...formData,
         amount: parseFloat(formData.amount),
+        accountId: formData.accountId || null,
       };
 
       if (editingTransaction) {
@@ -119,6 +145,7 @@ const Transactions = () => {
       category: transaction.category,
       date: new Date(transaction.date).toISOString().split('T')[0],
       notes: transaction.notes || '',
+      accountId: transaction.accountId || '',
     });
     setShowModal(true);
   };
@@ -131,6 +158,7 @@ const Transactions = () => {
       category: '',
       date: new Date().toISOString().split('T')[0],
       notes: '',
+      accountId: '',
     });
   };
 
@@ -474,6 +502,29 @@ const Transactions = () => {
                     required
                   />
                 </div>
+              </div>
+
+              {/* Account Selector */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Account
+                </label>
+                <select
+                  value={formData.accountId}
+                  onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none text-gray-900 dark:text-white"
+                  required
+                >
+                  <option value="">Select account</option>
+                  {accounts.map((account) => {
+                    const Icon = ACCOUNT_TYPE_ICONS[account.type] || Wallet;
+                    return (
+                      <option key={account.id} value={account.id}>
+                        {account.name} ({account.type.replace('_', ' ')})
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
 
               <div>

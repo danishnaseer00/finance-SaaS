@@ -32,7 +32,8 @@ const Layout = () => {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/transactions', label: 'Transactions' },
-    { path: '/reports', label: 'Budgets' },
+    { path: '/accounts', label: 'Accounts' },
+    { path: '/reports', label: 'History' },
     { path: '/ai-chat', label: 'Insights' },
   ];
 

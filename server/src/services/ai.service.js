@@ -1,4 +1,4 @@
-const { model } = require('../config/gemini');
+const { generateCompletion } = require('../config/openrouter');
 const prisma = require('../config/database');
 
 const SYSTEM_PROMPT = `You are FinSense AI, a helpful and friendly personal finance assistant. 
@@ -27,23 +27,21 @@ User Question: ${userMessage}
 Please provide a helpful, personalized response based on their financial situation.`;
 
   try {
-    const result = await model.generateContent([
-      { text: SYSTEM_PROMPT },
-      { text: contextPrompt },
-    ]);
+    const messages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: contextPrompt },
+    ];
 
-    const response = result.response;
-    return response.text();
+    const response = await generateCompletion(messages);
+    return response;
   } catch (error) {
-    console.error('Gemini API error:', error);
+    console.error('OpenRouter API error:', error);
     throw new Error('Failed to generate AI response');
   }
 };
 
 const generateAutoInsights = async (financialSnapshot) => {
-  const prompt = `${SYSTEM_PROMPT}
-
-Analyze this financial data and provide 3-5 brief, actionable insights:
+  const userPrompt = `Analyze this financial data and provide 3-5 brief, actionable insights:
 
 Financial Data:
 - Monthly Income: $${financialSnapshot.income}
@@ -57,11 +55,17 @@ Provide insights in JSON format:
   "insights": [
     { "type": "warning|success|tip", "title": "Brief title", "message": "Actionable insight" }
   ]
-}`;
+}
+
+Return ONLY valid JSON, no other text.`;
 
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const messages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: userPrompt },
+    ];
+
+    const text = await generateCompletion(messages);
     
     // Extract JSON from response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -71,15 +75,13 @@ Provide insights in JSON format:
     
     return { insights: [] };
   } catch (error) {
-    console.error('Gemini API error:', error);
+    console.error('OpenRouter API error:', error);
     return { insights: [] };
   }
 };
 
 const generateBudgetPlan = async (financialSnapshot) => {
-  const prompt = `${SYSTEM_PROMPT}
-
-Create a monthly budget plan based on this financial data:
+  const userPrompt = `Create a monthly budget plan based on this financial data:
 
 Financial Data:
 - Monthly Income: $${financialSnapshot.income}
@@ -93,11 +95,17 @@ Create a realistic budget plan in JSON format:
     { "category": "Category Name", "limit": 500, "priority": "essential|important|discretionary" }
   ],
   "tips": ["Budget tip 1", "Budget tip 2"]
-}`;
+}
+
+Return ONLY valid JSON, no other text.`;
 
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const messages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: userPrompt },
+    ];
+
+    const text = await generateCompletion(messages);
     
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
@@ -106,7 +114,7 @@ Create a realistic budget plan in JSON format:
     
     return null;
   } catch (error) {
-    console.error('Gemini API error:', error);
+    console.error('OpenRouter API error:', error);
     throw new Error('Failed to generate budget plan');
   }
 };

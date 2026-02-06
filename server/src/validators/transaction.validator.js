@@ -10,6 +10,7 @@ const transactionSchema = z.object({
     message: 'Invalid date format',
   }),
   notes: z.string().optional(),
+  accountId: z.string().uuid().optional().nullable(),
 });
 
 const transactionUpdateSchema = transactionSchema.partial();

@@ -74,40 +74,58 @@ const AIChat = () => {
   ];
 
   return (
-    <div className="h-[calc(100vh-12rem)] flex flex-col lg:flex-row gap-6">
+    <div className="flex flex-col lg:flex-row gap-6 min-h-[calc(100vh-12rem)]">
       {/* Chat Section */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden min-h-[500px] lg:min-h-0">
         {/* Chat Header */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-dark-700 bg-gradient-to-r from-primary-500 to-primary-600">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-dark-700">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/25">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Financial Assistant</h3>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Online</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">AI Financial Assistant</h3>
-              <p className="text-sm text-white/80">Powered by Google Gemini</p>
-            </div>
+            {/* Mobile Budget Button */}
+            <button
+              onClick={handleGenerateBudget}
+              disabled={loadingBudget}
+              className="lg:hidden px-3 py-2 bg-primary-500/10 text-primary-500 rounded-xl hover:bg-primary-500/20 transition flex items-center gap-2 text-sm font-medium"
+            >
+              {loadingBudget ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Wand2 className="w-4 h-4" />
+              )}
+              <span className="hidden sm:inline">Budget</span>
+            </button>
           </div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
+              className={`flex gap-2 sm:gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
             >
               <div
-                className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
                   message.role === 'user' 
                     ? 'bg-primary-500/10' 
                     : 'bg-gray-100 dark:bg-dark-700'
                 }`}
               >
                 {message.role === 'user' ? (
-                  <User className="w-4 h-4 text-primary-500" />
+                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary-500" />
                 ) : (
-                  <Bot className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-400" />
                 )}
               </div>
               <div
@@ -141,14 +159,14 @@ const AIChat = () => {
 
         {/* Suggested Questions */}
         {messages.length === 1 && (
-          <div className="px-6 pb-4">
+          <div className="px-4 sm:px-6 pb-4">
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Try asking:</p>
             <div className="flex flex-wrap gap-2">
               {suggestedQuestions.map((question, index) => (
                 <button
                   key={index}
                   onClick={() => setInput(question)}
-                  className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 rounded-full text-gray-700 dark:text-gray-300 transition"
+                  className="px-3 py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 rounded-full text-gray-700 dark:text-gray-300 transition"
                 >
                   {question}
                 </button>
@@ -158,8 +176,8 @@ const AIChat = () => {
         )}
 
         {/* Input */}
-        <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200 dark:border-dark-700">
-          <div className="flex gap-3">
+        <form onSubmit={handleSubmit} className="p-3 sm:p-4 border-t border-gray-200 dark:border-dark-700">
+          <div className="flex gap-2 sm:gap-3">
             <input
               ref={inputRef}
               type="text"
@@ -180,9 +198,9 @@ const AIChat = () => {
         </form>
       </div>
 
-      {/* Budget Plan Sidebar */}
-      <div className="w-full lg:w-80 flex-shrink-0">
-        <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6 sticky top-6">
+      {/* Budget Plan Sidebar - Hidden on mobile, collapsible */}
+      <div className="hidden lg:block w-80 flex-shrink-0">
+        <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6 sticky top-24">
           <div className="flex items-center gap-2 mb-4">
             <Wand2 className="w-5 h-5 text-primary-500" />
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white">AI Budget Plan</h3>

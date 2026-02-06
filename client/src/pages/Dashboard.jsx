@@ -33,7 +33,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { analyticsService, aiService, transactionService } from '../services/finance';
+import { analyticsService, aiService, transactionService, accountService } from '../services/finance';
 import { useTheme } from '../context/ThemeContext';
 import toast from 'react-hot-toast';
 
@@ -62,10 +62,12 @@ const Dashboard = () => {
   const [showDateDropdown, setShowDateDropdown] = useState(false);
   const [dateRange, setDateRange] = useState('Last 30 Days');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [accounts, setAccounts] = useState([]);
   const [formData, setFormData] = useState({
     amount: '',
     type: 'EXPENSE',
     category: '',
+    accountId: '',
     date: new Date().toISOString().split('T')[0],
     notes: '',
   });
@@ -79,13 +81,15 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashboardRes, transactionsRes] = await Promise.all([
+      const [dashboardRes, transactionsRes, accountsRes] = await Promise.all([
         analyticsService.getDashboard(),
         transactionService.getAll({ limit: 5 }),
+        accountService.getAll(),
       ]);
       setSnapshot(dashboardRes.data.snapshot);
       setTrends(dashboardRes.data.trends);
       setRecentTransactions(transactionsRes.data.transactions);
+      setAccounts(accountsRes.data.accounts || []);
     } catch (error) {
       toast.error('Failed to load dashboard data');
       console.error(error);
@@ -119,6 +123,7 @@ const Dashboard = () => {
         amount: '',
         type: 'EXPENSE',
         category: '',
+        accountId: '',
         date: new Date().toISOString().split('T')[0],
         notes: '',
       });
@@ -244,10 +249,10 @@ const Dashboard = () => {
         <StatCard
           icon={Wallet}
           label="Account Balance"
-          value={`$${snapshot?.balance?.toLocaleString() || '0'}`}
-          subtext="ACROSS 3 ACCOUNTS"
-          trend="up"
-          trendValue="+2.4%"
+          value={`$${snapshot?.accountBalance?.toLocaleString() || '0'}`}
+          subtext={`ACROSS ${snapshot?.accountCount || 0} ACCOUNTS`}
+          trend={snapshot?.balanceChange >= 0 ? 'up' : 'down'}
+          trendValue={`${snapshot?.balanceChange >= 0 ? '+' : ''}${snapshot?.balanceChange || 0}%`}
           color="bg-primary-500"
         />
         <StatCard
@@ -255,15 +260,15 @@ const Dashboard = () => {
           label="Monthly Expenses"
           value={`$${snapshot?.expenses?.toLocaleString() || '0'}`}
           subtext={`${snapshot?.transactionCount || 0} TRANSACTIONS THIS MONTH`}
-          trend="up"
-          trendValue="+12.8%"
+          trend={snapshot?.expenseChange <= 0 ? 'up' : 'down'}
+          trendValue={`${snapshot?.expenseChange >= 0 ? '+' : ''}${snapshot?.expenseChange || 0}%`}
           color="bg-indigo-500"
         />
         <StatCard
           icon={Target}
           label="Remaining Budget"
           value={`$${Math.max(0, (snapshot?.income || 0) - (snapshot?.expenses || 0)).toLocaleString()}`}
-          subtext="BUDGET ENDS IN 12 DAYS"
+          subtext={`${snapshot?.daysRemaining || 0} DAYS LEFT IN MONTH`}
           color="bg-slate-400"
         />
         <StatCard
@@ -271,8 +276,8 @@ const Dashboard = () => {
           label="Savings Rate"
           value={`${snapshot?.savingsRate || 0}%`}
           subtext={`GOAL: 30%`}
-          trend="up"
-          trendValue="+5.1%"
+          trend={snapshot?.savingsRateChange >= 0 ? 'up' : 'down'}
+          trendValue={`${snapshot?.savingsRateChange >= 0 ? '+' : ''}${snapshot?.savingsRateChange || 0}%`}
           color="bg-green-500"
         />
       </div>
@@ -628,6 +633,23 @@ const Dashboard = () => {
                     required
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Account</label>
+                <select
+                  value={formData.accountId}
+                  onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none text-gray-900 dark:text-white"
+                  required
+                >
+                  <option value="">Select account</option>
+                  {accounts.map((account) => (
+                    <option key={account.id} value={account.id}>
+                      {account.name} ({account.type.replace('_', ' ')})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>

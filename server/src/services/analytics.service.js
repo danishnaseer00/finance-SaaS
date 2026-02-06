@@ -16,6 +16,20 @@ const getFinancialSnapshot = async (userId) => {
     },
   });
 
+  // Get all active accounts
+  const accounts = await prisma.account.findMany({
+    where: {
+      userId,
+      status: 'ACTIVE',
+    },
+  });
+
+  // Calculate total account balance
+  const totalAccountBalance = accounts.reduce(
+    (sum, acc) => sum + parseFloat(acc.currentBalance),
+    0
+  );
+
   // Calculate totals
   let totalIncome = 0;
   let totalExpense = 0;
@@ -57,15 +71,70 @@ const getFinancialSnapshot = async (userId) => {
 
   healthScore = Math.max(0, Math.min(100, healthScore));
 
+  // Calculate days remaining in month
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const currentDay = now.getDate();
+  const daysRemaining = daysInMonth - currentDay;
+
+  // Get last month's data for comparison
+  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+  
+  const lastMonthTransactions = await prisma.transaction.findMany({
+    where: {
+      userId,
+      date: {
+        gte: lastMonthStart,
+        lte: lastMonthEnd,
+      },
+    },
+  });
+
+  let lastMonthIncome = 0;
+  let lastMonthExpense = 0;
+  lastMonthTransactions.forEach((t) => {
+    const amount = parseFloat(t.amount);
+    if (t.type === 'INCOME') lastMonthIncome += amount;
+    else lastMonthExpense += amount;
+  });
+
+  // Calculate percentage changes (vs last month)
+  const expenseChange = lastMonthExpense > 0 
+    ? Math.round(((totalExpense - lastMonthExpense) / lastMonthExpense) * 100 * 10) / 10
+    : 0;
+  
+  const incomeChange = lastMonthIncome > 0
+    ? Math.round(((totalIncome - lastMonthIncome) / lastMonthIncome) * 100 * 10) / 10
+    : 0;
+
+  // Get last month's account balance for comparison (approximation based on transactions)
+  const balanceChange = lastMonthIncome > 0 || lastMonthExpense > 0
+    ? Math.round(((totalAccountBalance - (lastMonthIncome - lastMonthExpense)) / Math.max(1, Math.abs(lastMonthIncome - lastMonthExpense))) * 100 * 10) / 10
+    : 0;
+
+  const lastMonthSavingsRate = lastMonthIncome > 0 
+    ? Math.round(((lastMonthIncome - lastMonthExpense) / lastMonthIncome) * 100)
+    : 0;
+  
+  const savingsRateChange = Math.round((savingsRate - lastMonthSavingsRate) * 10) / 10;
+
   return {
     income: Math.round(totalIncome * 100) / 100,
     expenses: Math.round(totalExpense * 100) / 100,
     balance: Math.round((totalIncome - totalExpense) * 100) / 100,
+    accountBalance: Math.round(totalAccountBalance * 100) / 100,
+    accountCount: accounts.length,
     savingsRate,
     healthScore,
     topCategories,
     transactionCount: transactions.length,
     month: startOfMonth.toISOString().slice(0, 7),
+    daysRemaining,
+    // Percentage changes vs last month
+    expenseChange,
+    incomeChange,
+    balanceChange,
+    savingsRateChange,
   };
 };
 
