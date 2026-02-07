@@ -33,6 +33,7 @@ const Layout = () => {
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/transactions', label: 'Transactions' },
     { path: '/accounts', label: 'Accounts' },
+    { path: '/budgets', label: 'Budgets' },
     { path: '/reports', label: 'History' },
     { path: '/ai-chat', label: 'Insights' },
   ];

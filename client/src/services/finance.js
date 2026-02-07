@@ -32,3 +32,13 @@ export const aiService = {
   getBudgetPlan: () => api.get('/ai/budget-plan'),
   getChatHistory: (limit = 20) => api.get('/ai/chat-history', { params: { limit } }),
 };
+
+export const budgetService = {
+  getAll: () => api.get('/budgets'),
+  getById: (id) => api.get(`/budgets/${id}`),
+  create: (data) => api.post('/budgets', data),
+  update: (id, data) => api.put(`/budgets/${id}`, data),
+  delete: (id) => api.delete(`/budgets/${id}`),
+  getOverview: () => api.get('/budgets/overview'),
+  getAvailableCategories: () => api.get('/budgets/categories'),
+};

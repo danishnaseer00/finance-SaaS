@@ -33,7 +33,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { analyticsService, aiService, transactionService, accountService } from '../services/finance';
+import { analyticsService, aiService, transactionService, accountService, budgetService } from '../services/finance';
 import { useTheme } from '../context/ThemeContext';
 import toast from 'react-hot-toast';
 
@@ -63,6 +63,7 @@ const Dashboard = () => {
   const [dateRange, setDateRange] = useState('Last 30 Days');
   const [showAddModal, setShowAddModal] = useState(false);
   const [accounts, setAccounts] = useState([]);
+  const [budgets, setBudgets] = useState([]);
   const [formData, setFormData] = useState({
     amount: '',
     type: 'EXPENSE',
@@ -81,15 +82,17 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashboardRes, transactionsRes, accountsRes] = await Promise.all([
+      const [dashboardRes, transactionsRes, accountsRes, budgetsRes] = await Promise.all([
         analyticsService.getDashboard(),
         transactionService.getAll({ limit: 5 }),
         accountService.getAll(),
+        budgetService.getAll(),
       ]);
       setSnapshot(dashboardRes.data.snapshot);
       setTrends(dashboardRes.data.trends);
       setRecentTransactions(transactionsRes.data.transactions);
       setAccounts(accountsRes.data.accounts || []);
+      setBudgets(budgetsRes.data.budgets || []);
     } catch (error) {
       toast.error('Failed to load dashboard data');
       console.error(error);
@@ -529,6 +532,58 @@ const Dashboard = () => {
           })}
         </div>
       </div>
+
+      {/* Budget Overview */}
+      {budgets.length > 0 && (
+        <div className="glass-card rounded-2xl p-5 sm:p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Budget Overview</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Track your spending limits</p>
+            </div>
+            <a href="/budgets" className="text-sm font-medium text-primary-500 hover:text-primary-600 transition-colors">
+              Manage
+            </a>
+          </div>
+          <div className="space-y-4">
+            {budgets.slice(0, 4).map((budget) => {
+              const progressColor = budget.status === 'exceeded' 
+                ? 'bg-red-500' 
+                : budget.status === 'warning' 
+                  ? 'bg-yellow-500' 
+                  : 'bg-green-500';
+              const statusColor = budget.status === 'exceeded'
+                ? 'text-red-500'
+                : budget.status === 'warning'
+                  ? 'text-yellow-500'
+                  : 'text-green-500';
+              return (
+                <div key={budget.id} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {budget.category}
+                    </span>
+                    <span className={`text-sm font-medium ${statusColor}`}>
+                      ${budget.spent.toLocaleString()} / ${budget.amount.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-dark-600 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${progressColor} transition-all duration-500`}
+                      style={{ width: `${Math.min(budget.percentage, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {budgets.length > 4 && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 text-center">
+              +{budgets.length - 4} more budgets
+            </p>
+          )}
+        </div>
+      )}
 
       {/* AI Smart Insight */}
       {insights.length > 0 && (
