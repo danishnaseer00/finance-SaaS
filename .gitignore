@@ -5,6 +5,7 @@ node_modules/
 .env
 .env.local
 .env.production
+.env.example
 
 # Build outputs
 dist/
@@ -28,3 +29,7 @@ server/prisma/*.db-journal
 
 # Coverage
 coverage/
+
+# markdownlint
+ARCHITECTURE.md
+BUDGET_LOGIC.md

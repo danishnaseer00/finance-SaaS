@@ -30,8 +30,6 @@ const ACCOUNT_TYPES = [
   { value: 'WALLET', label: 'Digital Wallet', icon: Smartphone, color: '#f59e0b' },
 ];
 
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'CAD', 'AUD', 'JPY'];
-
 const ACCOUNT_COLORS = [
   '#8b5cf6', '#6366f1', '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6'
 ];
@@ -487,46 +485,23 @@ const Accounts = () => {
                 </div>
               </div>
               
-              {/* Opening Balance and Currency */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Opening Balance
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.openingBalance}
-                    onChange={(e) => setFormData({ ...formData, openingBalance: e.target.value })}
-                    className={`w-full px-4 py-3 rounded-xl border ${
-                      isDark
-                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'
-                    } focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
-                    placeholder="0.00"
-                  />
-                </div>
-                
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Currency
-                  </label>
-                  <select
-                    value={formData.currency}
-                    onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                    className={`w-full px-4 py-3 rounded-xl border ${
-                      isDark
-                        ? 'bg-gray-700 border-gray-600 text-white'
-                        : 'bg-white border-gray-200 text-gray-900'
-                    } focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
-                  >
-                    {CURRENCIES.map((currency) => (
-                      <option key={currency} value={currency}>
-                        {currency}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              {/* Opening Balance */}
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Opening Balance (USD)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.openingBalance}
+                  onChange={(e) => setFormData({ ...formData, openingBalance: e.target.value })}
+                  className={`w-full px-4 py-3 rounded-xl border ${
+                    isDark
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                      : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'
+                  } focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
+                  placeholder="0.00"
+                />
               </div>
               
               {/* Submit Button */}

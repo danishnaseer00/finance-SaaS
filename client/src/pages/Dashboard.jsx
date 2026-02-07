@@ -202,15 +202,23 @@ const Dashboard = () => {
 
   const totalSpent = pieData.reduce((acc, curr) => acc + curr.value, 0);
 
-  const StatCard = ({ icon: Icon, label, value, subtext, color }) => (
-    <div className="glass-card rounded-2xl p-5 sm:p-6">
+  const StatCard = ({ icon: Icon, label, value, subtext, color, valueColor, tooltip }) => (
+    <div className="glass-card rounded-2xl p-5 sm:p-6 relative group">
       <div className="flex items-start justify-between mb-4">
         <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${color}`}>
           <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </div>
+        {tooltip && (
+          <div className="relative">
+            <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-dark-600 flex items-center justify-center cursor-help text-xs text-gray-500 dark:text-gray-400 font-medium">?</div>
+            <div className="absolute right-0 top-6 w-48 p-2 bg-gray-900 dark:bg-dark-600 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-lg">
+              {tooltip}
+            </div>
+          </div>
+        )}
       </div>
       <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">{label}</p>
-      <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+      <p className={`text-xl sm:text-2xl font-bold ${valueColor || 'text-gray-900 dark:text-white'}`}>{value}</p>
       {subtext && (
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{subtext}</p>
       )}
@@ -259,9 +267,11 @@ const Dashboard = () => {
         <StatCard
           icon={Target}
           label="Remaining Budget"
-          value={`$${Math.max(0, (snapshot?.income || 0) - (snapshot?.expenses || 0)).toLocaleString()}`}
+          value={`${(snapshot?.budgetRemaining ?? 0) < 0 ? '-' : ''}$${Math.abs(snapshot?.budgetRemaining ?? 0).toLocaleString()}`}
           subtext={`${snapshot?.daysRemaining || 0} DAYS LEFT IN MONTH`}
           color="bg-slate-400"
+          valueColor={(snapshot?.budgetRemaining ?? 0) < 0 ? 'text-red-500' : undefined}
+          tooltip="Total budget limits minus spending in budgeted categories. Set budgets in the Budgets page. Negative means you've overspent."
         />
         <StatCard
           icon={PiggyBank}
@@ -269,6 +279,8 @@ const Dashboard = () => {
           value={`${snapshot?.savingsRate || 0}%`}
           subtext={`GOAL: 30%`}
           color="bg-green-500"
+          valueColor={(snapshot?.savingsRate || 0) < 0 ? 'text-red-500' : undefined}
+          tooltip="Savings Rate = (Income - Expenses) / Income. Add income transactions to see your savings percentage. Negative means you spent more than you earned."
         />
       </div>
 

@@ -197,7 +197,7 @@ const Budgets = () => {
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Remaining</p>
                 <p className={`text-lg font-bold ${overview.remaining >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  ${Math.abs(overview.remaining).toLocaleString()}
+                  {overview.remaining >= 0 ? '' : '-'}${Math.abs(overview.remaining).toLocaleString()}
                 </p>
               </div>
             </div>

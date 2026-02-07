@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const budgetService = require('./budget.service');
 
 const getFinancialSnapshot = async (userId) => {
   const now = new Date();
@@ -118,6 +119,17 @@ const getFinancialSnapshot = async (userId) => {
   
   const savingsRateChange = Math.round((savingsRate - lastMonthSavingsRate) * 10) / 10;
 
+  // Get budget overview for remaining budget
+  let budgetRemaining = 0;
+  let totalBudget = 0;
+  try {
+    const budgetOverview = await budgetService.getBudgetOverview(userId);
+    budgetRemaining = budgetOverview.remaining;
+    totalBudget = budgetOverview.totalBudget;
+  } catch (e) {
+    // If no budgets, default to 0
+  }
+
   return {
     income: Math.round(totalIncome * 100) / 100,
     expenses: Math.round(totalExpense * 100) / 100,
@@ -130,6 +142,8 @@ const getFinancialSnapshot = async (userId) => {
     transactionCount: transactions.length,
     month: startOfMonth.toISOString().slice(0, 7),
     daysRemaining,
+    budgetRemaining: Math.round(budgetRemaining * 100) / 100,
+    totalBudget: Math.round(totalBudget * 100) / 100,
     // Percentage changes vs last month
     expenseChange,
     incomeChange,
