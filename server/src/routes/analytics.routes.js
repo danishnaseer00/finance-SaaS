@@ -10,5 +10,6 @@ router.get('/dashboard', analyticsController.getDashboard);
 router.get('/snapshot', analyticsController.getSnapshot);
 router.get('/trends', analyticsController.getTrends);
 router.get('/categories', analyticsController.getCategoryBreakdown);
+router.get('/daily-trends', analyticsController.getDailyTrends);
 
 module.exports = router;

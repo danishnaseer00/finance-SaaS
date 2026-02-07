@@ -163,7 +163,7 @@ Report Date: ${new Date().toLocaleDateString()}
         <button
           onClick={generatePDFReport}
           disabled={!monthlyData || (monthlyData.income === 0 && monthlyData.expense === 0)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
         >
           <Download className="w-5 h-5" />
           Download Report
@@ -171,8 +171,8 @@ Report Date: ${new Date().toLocaleDateString()}
       </div>
 
       {/* Month Picker */}
-      <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6">
-        <div className="flex items-center justify-between">
+      <div className="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
             <Calendar className="w-5 h-5 text-primary-500" />
             <span className="text-gray-600 dark:text-gray-400">Viewing:</span>
@@ -180,7 +180,7 @@ Report Date: ${new Date().toLocaleDateString()}
           <div className="relative">
             <button
               onClick={() => setShowCalendar(!showCalendar)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition font-medium"
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition font-medium text-sm sm:text-base w-full sm:w-auto"
             >
               <Calendar className="w-4 h-4" />
               {selectedMonthName}
@@ -190,7 +190,7 @@ Report Date: ${new Date().toLocaleDateString()}
             {showCalendar && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowCalendar(false)} />
-                <div className={`absolute right-0 top-full mt-2 z-50 w-72 rounded-2xl shadow-xl border ${
+                <div className={`absolute left-0 sm:left-auto sm:right-0 top-full mt-2 z-50 w-64 sm:w-72 rounded-2xl shadow-xl border ${
                   isDark ? 'bg-dark-800 border-dark-700' : 'bg-white border-gray-200'
                 } p-4`}>
                   {/* Year Navigation */}

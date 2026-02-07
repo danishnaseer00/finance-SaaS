@@ -24,6 +24,7 @@ export const analyticsService = {
   getTrends: (months = 6) => api.get('/analytics/trends', { params: { months } }),
   getCategoryBreakdown: (startDate, endDate) => 
     api.get('/analytics/categories', { params: { startDate, endDate } }),
+  getDailyTrends: (year, month) => api.get('/analytics/daily-trends', { params: { year, month } }),
 };
 
 export const aiService = {

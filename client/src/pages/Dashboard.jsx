@@ -8,8 +8,6 @@ import {
   Target,
   Calendar,
   Plus,
-  ArrowUpRight,
-  ArrowDownRight,
   Lightbulb,
   ShoppingBag,
   Coffee,
@@ -17,6 +15,8 @@ import {
   MoreHorizontal,
   Sparkles,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   X,
   ArrowUpCircle,
   ArrowDownCircle,
@@ -59,11 +59,22 @@ const Dashboard = () => {
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [insights, setInsights] = useState([]);
   const [insightsLoading, setInsightsLoading] = useState(false);
-  const [showDateDropdown, setShowDateDropdown] = useState(false);
-  const [dateRange, setDateRange] = useState('Last 30 Days');
   const [showAddModal, setShowAddModal] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [budgets, setBudgets] = useState([]);
+  
+  // Month picker state for daily trends
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() + 1 };
+  });
+  const [dailyTrends, setDailyTrends] = useState(null);
+  const [dailyTrendsLoading, setDailyTrendsLoading] = useState(false);
+  const [pickerYear, setPickerYear] = useState(new Date().getFullYear());
+  
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
   const [formData, setFormData] = useState({
     amount: '',
     type: 'EXPENSE',
@@ -130,18 +141,36 @@ const Dashboard = () => {
         date: new Date().toISOString().split('T')[0],
         notes: '',
       });
+      // Refresh both dashboard data and daily trends
       fetchDashboardData();
+      fetchDailyTrends(selectedMonth.year, selectedMonth.month);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to add transaction');
     }
   };
 
-  const handleDateRangeSelect = (range) => {
-    setDateRange(range);
-    setShowDateDropdown(false);
-    // You can add API call here to filter by date range
-    toast.success(`Showing data for ${range}`);
+  const fetchDailyTrends = async (year, month) => {
+    try {
+      setDailyTrendsLoading(true);
+      const response = await analyticsService.getDailyTrends(year, month);
+      setDailyTrends(response.data);
+    } catch (error) {
+      console.error('Failed to load daily trends');
+    } finally {
+      setDailyTrendsLoading(false);
+    }
   };
+
+  const handleMonthSelect = (month) => {
+    setSelectedMonth({ year: pickerYear, month });
+    setShowMonthPicker(false);
+    fetchDailyTrends(pickerYear, month);
+  };
+
+  // Fetch daily trends on component mount
+  useEffect(() => {
+    fetchDailyTrends(selectedMonth.year, selectedMonth.month);
+  }, []);
 
   useEffect(() => {
     if (snapshot) {
@@ -173,20 +202,12 @@ const Dashboard = () => {
 
   const totalSpent = pieData.reduce((acc, curr) => acc + curr.value, 0);
 
-  const StatCard = ({ icon: Icon, label, value, subtext, trend, trendValue, color }) => (
+  const StatCard = ({ icon: Icon, label, value, subtext, color }) => (
     <div className="glass-card rounded-2xl p-5 sm:p-6">
       <div className="flex items-start justify-between mb-4">
         <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${color}`}>
           <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </div>
-        {trend && (
-          <div className={`flex items-center gap-1 text-xs sm:text-sm font-medium ${
-            trend === 'up' ? 'text-green-500' : 'text-red-500'
-          }`}>
-            {trend === 'up' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-            {trendValue}
-          </div>
-        )}
       </div>
       <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">{label}</p>
       <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
@@ -209,40 +230,12 @@ const Dashboard = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {/* Date Range Dropdown */}
-          <div className="relative">
-            <button 
-              onClick={() => setShowDateDropdown(!showDateDropdown)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-600 transition-colors"
-            >
-              <Calendar className="w-4 h-4" />
-              <span className="hidden sm:inline">{dateRange}</span>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {showDateDropdown && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl shadow-lg z-20 overflow-hidden">
-                {['Last 7 Days', 'Last 30 Days', 'Last 90 Days', 'This Year', 'All Time'].map((range) => (
-                  <button
-                    key={range}
-                    onClick={() => handleDateRangeSelect(range)}
-                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-dark-700 transition ${
-                      dateRange === range 
-                        ? 'text-primary-500 bg-primary-50 dark:bg-primary-500/10' 
-                        : 'text-gray-700 dark:text-gray-300'
-                    }`}
-                  >
-                    {range}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
           <button 
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 rounded-xl text-sm font-medium text-white transition-colors"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Expense</span>
+            <span>Add</span>
           </button>
         </div>
       </div>
@@ -254,8 +247,6 @@ const Dashboard = () => {
           label="Account Balance"
           value={`$${snapshot?.accountBalance?.toLocaleString() || '0'}`}
           subtext={`ACROSS ${snapshot?.accountCount || 0} ACCOUNTS`}
-          trend={snapshot?.balanceChange >= 0 ? 'up' : 'down'}
-          trendValue={`${snapshot?.balanceChange >= 0 ? '+' : ''}${snapshot?.balanceChange || 0}%`}
           color="bg-primary-500"
         />
         <StatCard
@@ -263,8 +254,6 @@ const Dashboard = () => {
           label="Monthly Expenses"
           value={`$${snapshot?.expenses?.toLocaleString() || '0'}`}
           subtext={`${snapshot?.transactionCount || 0} TRANSACTIONS THIS MONTH`}
-          trend={snapshot?.expenseChange <= 0 ? 'up' : 'down'}
-          trendValue={`${snapshot?.expenseChange >= 0 ? '+' : ''}${snapshot?.expenseChange || 0}%`}
           color="bg-indigo-500"
         />
         <StatCard
@@ -279,8 +268,6 @@ const Dashboard = () => {
           label="Savings Rate"
           value={`${snapshot?.savingsRate || 0}%`}
           subtext={`GOAL: 30%`}
-          trend={snapshot?.savingsRateChange >= 0 ? 'up' : 'down'}
-          trendValue={`${snapshot?.savingsRateChange >= 0 ? '+' : ''}${snapshot?.savingsRateChange || 0}%`}
           color="bg-green-500"
         />
       </div>
@@ -292,55 +279,169 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Transaction Trends</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Daily spending volume for {new Date().toLocaleDateString('en-US', { month: 'long' })}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Daily spending for {dailyTrends?.monthName || 'this month'}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-primary-500 rounded-full"></span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">Spending</span>
+            <div className="flex items-center gap-4">
+              {/* Month Picker */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowMonthPicker(!showMonthPicker)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-dark-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors"
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>{MONTHS[selectedMonth.month - 1]} {selectedMonth.year}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                
+                {showMonthPicker && (
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl shadow-lg z-20 p-4">
+                    {/* Year Navigation */}
+                    <div className="flex items-center justify-between mb-3">
+                      <button
+                        onClick={() => setPickerYear(pickerYear - 1)}
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+                      >
+                        <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                      </button>
+                      <span className="font-semibold text-gray-900 dark:text-white">{pickerYear}</span>
+                      <button
+                        onClick={() => setPickerYear(pickerYear + 1)}
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+                      >
+                        <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                      </button>
+                    </div>
+                    
+                    {/* Month Grid */}
+                    <div className="grid grid-cols-4 gap-2">
+                      {MONTHS.map((month, index) => {
+                        const isSelected = selectedMonth.month === index + 1 && selectedMonth.year === pickerYear;
+                        const now = new Date();
+                        const isFuture = pickerYear > now.getFullYear() || 
+                          (pickerYear === now.getFullYear() && index + 1 > now.getMonth() + 1);
+                        
+                        return (
+                          <button
+                            key={month}
+                            onClick={() => !isFuture && handleMonthSelect(index + 1)}
+                            disabled={isFuture}
+                            className={`py-2 px-3 text-sm rounded-lg transition-colors ${
+                              isSelected
+                                ? 'bg-primary-500 text-white'
+                                : isFuture
+                                  ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700'
+                            }`}
+                          >
+                            {month}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Legend */}
+              <div className="hidden sm:flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  <span className="w-3 h-3 bg-primary-500 rounded-full"></span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Expenses</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Income</span>
+                </div>
+              </div>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorSpending" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1e2642' : '#f1f5f9'} vertical={false} />
-              <XAxis 
-                dataKey="name" 
-                stroke={isDark ? '#64748b' : '#94a3b8'} 
-                fontSize={12}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis 
-                stroke={isDark ? '#64748b' : '#94a3b8'} 
-                fontSize={12}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(value) => `$${value}`}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: isDark ? '#151d33' : '#fff',
-                  border: `1px solid ${isDark ? '#1e2642' : '#e2e8f0'}`,
-                  borderRadius: '12px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                }}
-                labelStyle={{ color: isDark ? '#fff' : '#1f2937' }}
-              />
-              <Area
-                type="monotone"
-                dataKey="spending"
-                stroke="#8b5cf6"
-                strokeWidth={2}
-                fillOpacity={1}
-                fill="url(#colorSpending)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          
+          {dailyTrendsLoading ? (
+            <div className="h-[280px] flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={dailyTrends?.days || []}>
+                <defs>
+                  <linearGradient id="colorDailyExpense" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorDailyIncome" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1e2642' : '#f1f5f9'} vertical={false} />
+                <XAxis 
+                  dataKey="dayLabel" 
+                  stroke={isDark ? '#64748b' : '#94a3b8'} 
+                  fontSize={10}
+                  axisLine={false}
+                  tickLine={false}
+                  interval={2}
+                />
+                <YAxis 
+                  stroke={isDark ? '#64748b' : '#94a3b8'} 
+                  fontSize={11}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(value) => `$${value}`}
+                  width={50}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: isDark ? '#151d33' : '#fff',
+                    border: `1px solid ${isDark ? '#1e2642' : '#e2e8f0'}`,
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  }}
+                  labelStyle={{ color: isDark ? '#fff' : '#1f2937' }}
+                  formatter={(value, name) => [`$${value.toFixed(2)}`, name === 'expense' ? 'Expenses' : 'Income']}
+                  labelFormatter={(label) => `Day ${label}`}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="income"
+                  stroke="#22c55e"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorDailyIncome)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="expense"
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorDailyExpense)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+          
+          {/* Month Totals */}
+          {dailyTrends && (
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-dark-700 grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Income</p>
+                <p className="text-lg font-semibold text-green-500">${dailyTrends.totals.income.toLocaleString()}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Expenses</p>
+                <p className="text-lg font-semibold text-primary-500">${dailyTrends.totals.expense.toLocaleString()}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Net</p>
+                <p className={`text-lg font-semibold ${dailyTrends.totals.net >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {dailyTrends.totals.net >= 0 ? '+' : ''}${dailyTrends.totals.net.toLocaleString()}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Spending by Category */}
@@ -762,14 +863,6 @@ const Dashboard = () => {
             </form>
           </div>
         </div>
-      )}
-
-      {/* Click outside to close dropdown */}
-      {showDateDropdown && (
-        <div 
-          className="fixed inset-0 z-10" 
-          onClick={() => setShowDateDropdown(false)}
-        />
       )}
     </div>
   );

@@ -207,8 +207,78 @@ const getCategoryBreakdown = async (userId, startDate, endDate) => {
     .sort((a, b) => b.amount - a.amount);
 };
 
+const getDailyTrends = async (userId, year, month) => {
+  const startOfMonth = new Date(year, month - 1, 1);
+  const endOfMonth = new Date(year, month, 0, 23, 59, 59);
+  const daysInMonth = endOfMonth.getDate();
+
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      userId,
+      date: {
+        gte: startOfMonth,
+        lte: endOfMonth,
+      },
+    },
+    orderBy: { date: 'asc' },
+  });
+
+  // Initialize daily data
+  const dailyData = [];
+  for (let day = 1; day <= daysInMonth; day++) {
+    dailyData.push({
+      day,
+      date: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+      dayLabel: String(day),
+      income: 0,
+      expense: 0,
+    });
+  }
+
+  // Aggregate transactions by day
+  transactions.forEach((t) => {
+    const transactionDate = new Date(t.date);
+    const day = transactionDate.getDate();
+    const amount = parseFloat(t.amount);
+    
+    if (t.type === 'INCOME') {
+      dailyData[day - 1].income += amount;
+    } else {
+      dailyData[day - 1].expense += amount;
+    }
+  });
+
+  // Round values
+  dailyData.forEach((d) => {
+    d.income = Math.round(d.income * 100) / 100;
+    d.expense = Math.round(d.expense * 100) / 100;
+  });
+
+  // Calculate totals for the month
+  const totals = dailyData.reduce(
+    (acc, d) => ({
+      income: acc.income + d.income,
+      expense: acc.expense + d.expense,
+    }),
+    { income: 0, expense: 0 }
+  );
+
+  return {
+    year,
+    month,
+    monthName: startOfMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+    days: dailyData,
+    totals: {
+      income: Math.round(totals.income * 100) / 100,
+      expense: Math.round(totals.expense * 100) / 100,
+      net: Math.round((totals.income - totals.expense) * 100) / 100,
+    },
+  };
+};
+
 module.exports = {
   getFinancialSnapshot,
   getMonthlyTrends,
   getCategoryBreakdown,
+  getDailyTrends,
 };

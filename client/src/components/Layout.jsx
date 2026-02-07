@@ -10,7 +10,6 @@ import {
   LogOut,
   Menu,
   X,
-  Bell,
   Sun,
   Moon,
   Sparkles,
@@ -50,8 +49,8 @@ const Layout = () => {
                 <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  FinSense AI
+                <span className="text-xl font-semibold text-gray-900 dark:text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  FinSense
                 </span>
               </div>
 
@@ -84,12 +83,6 @@ const Layout = () => {
                 aria-label="Toggle theme"
               >
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-
-              {/* Notifications */}
-              <button className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors relative">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-500 rounded-full"></span>
               </button>
 
               {/* Profile Dropdown */}

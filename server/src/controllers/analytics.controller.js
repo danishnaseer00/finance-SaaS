@@ -53,9 +53,23 @@ const getCategoryBreakdown = async (req, res, next) => {
   }
 };
 
+const getDailyTrends = async (req, res, next) => {
+  try {
+    const now = new Date();
+    const year = parseInt(req.query.year) || now.getFullYear();
+    const month = parseInt(req.query.month) || now.getMonth() + 1;
+
+    const dailyTrends = await analyticsService.getDailyTrends(req.user.id, year, month);
+    res.json(dailyTrends);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getDashboard,
   getSnapshot,
   getTrends,
   getCategoryBreakdown,
+  getDailyTrends,
 };

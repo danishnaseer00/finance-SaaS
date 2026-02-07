@@ -54,9 +54,9 @@ const Login = () => {
             <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
               <Sparkles className="w-7 h-7 text-white" />
             </div>
-            <span className="text-2xl font-bold text-gray-900 dark:text-white">FinSense AI</span>
+            <span className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: "'Playfair Display', serif" }}>FinSense</span>
           </div>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">AI-Powered Financial Tracking</p>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Smart Financial Tracking</p>
         </div>
 
         {/* Form Card */}
