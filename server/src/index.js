@@ -7,6 +7,7 @@ const transactionRoutes = require('./routes/transaction.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
 const aiRoutes = require('./routes/ai.routes');
 const accountRoutes = require('./routes/account.routes');
+const budgetRoutes = require('./routes/budget.routes');
 const { errorHandler } = require('./middleware/error.middleware');
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/accounts', accountRoutes);
+app.use('/api/budgets', budgetRoutes);
 
 // Error handling
 app.use(errorHandler);
