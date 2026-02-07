@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
+import { signInWithGoogle } from '../config/firebase';
 
 const AuthContext = createContext(null);
 
@@ -62,6 +63,18 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const googleLogin = async () => {
+    const { idToken } = await signInWithGoogle();
+    const response = await api.post('/auth/google', { idToken });
+    const { user, token } = response.data;
+    
+    localStorage.setItem('token', token);
+    setToken(token);
+    setUser(user);
+    
+    return user;
+  };
+
   const value = {
     user,
     token,
@@ -70,6 +83,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    googleLogin,
   };
 
   return (
