@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, Mail, Lock, User, AlertCircle, Sun, Moon } from 'lucide-react';
@@ -17,11 +17,12 @@ const Register = () => {
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
-  if (isAuthenticated) {
-    navigate('/dashboard');
-    return null;
-  }
+  // Redirect if already logged in (using useEffect to avoid issues)
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,7 +34,9 @@ const Register = () => {
       toast.success('Account created successfully!');
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
+      const errorMessage = err.response?.data?.error || 'Registration failed. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -47,11 +50,18 @@ const Register = () => {
       toast.success('Account created successfully!');
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Google sign-up failed');
+      const errorMessage = err.message || 'Google sign-up failed';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setGoogleLoading(false);
     }
   };
+
+  // Don't render form if already authenticated
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center p-4 transition-colors">

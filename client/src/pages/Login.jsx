@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, Mail, Lock, AlertCircle, Sun, Moon } from 'lucide-react';
@@ -16,11 +16,12 @@ const Login = () => {
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
-  if (isAuthenticated) {
-    navigate('/dashboard');
-    return null;
-  }
+  // Redirect if already logged in (using useEffect to avoid issues)
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,7 +33,9 @@ const Login = () => {
       toast.success('Welcome back!');
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      const errorMessage = err.response?.data?.error || 'Login failed. Please check your credentials.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -46,11 +49,18 @@ const Login = () => {
       toast.success('Welcome back!');
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Google sign-in failed');
+      const errorMessage = err.message || 'Google sign-in failed';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setGoogleLoading(false);
     }
   };
+
+  // Don't render form if already authenticated
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center p-4 transition-colors">
