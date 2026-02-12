@@ -13,5 +13,7 @@ router.post('/google', authController.googleAuth);
 // Protected routes
 router.get('/profile', authenticate, authController.getProfile);
 router.put('/profile', authenticate, authController.updateProfile);
+router.post('/set-password', authenticate, authController.setPassword);
+router.get('/providers', authenticate, authController.getAuthProviders);
 
 module.exports = router;

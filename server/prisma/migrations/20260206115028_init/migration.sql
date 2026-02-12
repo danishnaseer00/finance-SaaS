@@ -1,10 +1,6 @@
--- CreateEnum
 CREATE TYPE "TransactionType" AS ENUM ('INCOME', 'EXPENSE');
-
--- CreateEnum
 CREATE TYPE "InsightType" AS ENUM ('CHAT', 'AUTO', 'BUDGET');
 
--- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -16,7 +12,6 @@ CREATE TABLE "users" (
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
 CREATE TABLE "transactions" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
@@ -31,7 +26,7 @@ CREATE TABLE "transactions" (
     CONSTRAINT "transactions_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+
 CREATE TABLE "financial_summaries" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
@@ -46,7 +41,7 @@ CREATE TABLE "financial_summaries" (
     CONSTRAINT "financial_summaries_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
+
 CREATE TABLE "ai_insights" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
@@ -57,35 +52,19 @@ CREATE TABLE "ai_insights" (
     CONSTRAINT "ai_insights_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
-
--- CreateIndex
 CREATE INDEX "transactions_user_id_idx" ON "transactions"("user_id");
-
--- CreateIndex
 CREATE INDEX "transactions_date_idx" ON "transactions"("date");
-
--- CreateIndex
 CREATE INDEX "transactions_category_idx" ON "transactions"("category");
-
--- CreateIndex
 CREATE INDEX "financial_summaries_user_id_idx" ON "financial_summaries"("user_id");
-
--- CreateIndex
 CREATE UNIQUE INDEX "financial_summaries_user_id_month_key" ON "financial_summaries"("user_id", "month");
 
--- CreateIndex
+
 CREATE INDEX "ai_insights_user_id_idx" ON "ai_insights"("user_id");
 
--- CreateIndex
 CREATE INDEX "ai_insights_created_at_idx" ON "ai_insights"("created_at");
-
--- AddForeignKey
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
--- AddForeignKey
 ALTER TABLE "financial_summaries" ADD CONSTRAINT "financial_summaries_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
--- AddForeignKey
 ALTER TABLE "ai_insights" ADD CONSTRAINT "ai_insights_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

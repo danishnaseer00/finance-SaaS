@@ -1,8 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 
-// Firebase configuration - Replace with your own Firebase project credentials
-// Get these from: Firebase Console > Project Settings > General > Your apps > Web app
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "YOUR_API_KEY",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "YOUR_PROJECT.firebaseapp.com",
