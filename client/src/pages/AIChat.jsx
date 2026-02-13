@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Loader2, Trash2 } from 'lucide-react';
 import { aiService } from '../services/finance';
 import toast from 'react-hot-toast';
 
@@ -7,6 +7,7 @@ const AIChat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -14,6 +15,35 @@ const AIChat = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Load chat history on mount
+  useEffect(() => {
+    const loadChatHistory = async () => {
+      try {
+        const response = await aiService.getChatHistory(50);
+        const history = response.data.history || [];
+        
+        // Convert history to messages format (reverse to show oldest first)
+        const chatMessages = [];
+        history.reverse().forEach((item) => {
+          if (item.userMessage) {
+            chatMessages.push({ role: 'user', content: item.userMessage });
+          }
+          if (item.aiResponse) {
+            chatMessages.push({ role: 'assistant', content: item.aiResponse });
+          }
+        });
+        
+        setMessages(chatMessages);
+      } catch (error) {
+        console.error('Failed to load chat history:', error);
+      } finally {
+        setLoadingHistory(false);
+      }
+    };
+
+    loadChatHistory();
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -58,21 +88,42 @@ const AIChat = () => {
       <div className="flex flex-col h-full bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
         {/* Header */}
         <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-dark-700">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
-              <Bot className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">FinSense Bot</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Your personal finance assistant</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">FinSense Bot</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Your personal finance assistant</p>
-            </div>
+            {messages.length > 0 && (
+              <button
+                onClick={() => setMessages([])}
+                className="p-2 text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+                title="Clear chat"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </div>
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          {/* Loading History */}
+          {loadingHistory && (
+            <div className="flex items-center justify-center h-full">
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Loading chat history...</span>
+              </div>
+            </div>
+          )}
+
           {/* Welcome Message */}
-          {messages.length === 0 && (
+          {!loadingHistory && messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
                 <Bot className="w-8 h-8 text-white" />
@@ -98,7 +149,7 @@ const AIChat = () => {
           )}
 
           {/* Chat Messages */}
-          {messages.length > 0 && (
+          {!loadingHistory && messages.length > 0 && (
             <div className="space-y-4">
               {messages.map((message, index) => (
                 <div

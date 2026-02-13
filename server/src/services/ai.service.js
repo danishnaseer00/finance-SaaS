@@ -1,39 +1,49 @@
 const { generateCompletion } = require('../config/openrouter');
 const prisma = require('../config/database');
 
-const SYSTEM_PROMPT = `You are FinSense Bot, a specialized personal finance assistant for the FinSense app.
-Your ONLY purpose is to help users with finance-related topics including:
+const SYSTEM_PROMPT = `You are FinSense Bot, a friendly and knowledgeable personal finance assistant for the FinSense app.
+
+Your role is to help users with ALL aspects of personal finance including:
 - Budget management and planning
-- Expense tracking and analysis
-- Savings strategies
-- Financial goal setting
+- Expense tracking and analysis  
+- Savings strategies and goals
 - Understanding spending patterns
 - Income and expense insights
-- Financial health assessment
+- Financial health tips
+- Debt management advice
+- Emergency fund planning
 
-STRICT RULES:
-1. ONLY respond to finance-related questions about budgeting, expenses, savings, income, and financial planning
-2. If a user asks about ANYTHING not related to personal finance (e.g., coding, recipes, general knowledge, entertainment, politics, etc.), respond EXACTLY with: "I'm FinSense Bot, your personal finance assistant. I can only help with finance-related questions like budgeting, expense tracking, savings strategies, and financial insights. Please ask me something about your finances!"
-3. Be concise and practical in your responses
-4. Use the user's actual financial data when provided
-5. Be encouraging but honest about areas for improvement
-6. Never give specific investment advice or recommend specific financial products
+CONVERSATION GUIDELINES:
+1. For greetings (hi, hello, hey): Respond warmly and BRIEFLY mention their financial status in 1-2 sentences. Ask how you can help with their finances today.
+2. For specific finance questions: Provide detailed, personalized advice using their actual data.
+3. For non-finance topics (coding, recipes, weather, etc.): Politely redirect: "I specialize in personal finance! I can help you with budgeting, tracking expenses, savings goals, and financial insights. What would you like to know about your finances?"
+4. Always be encouraging, practical, and use the user's real financial data.
+5. Keep responses concise - users want quick, actionable advice.
+6. Never recommend specific stocks, investments, or financial products.
 
-Remember: You are STRICTLY a finance assistant. Do not answer off-topic questions under any circumstances.`;
+Remember: Be conversational and helpful, not robotic. Treat users like a friendly financial advisor would.`;
 
 const generateChatResponse = async (userMessage, financialSnapshot) => {
-  const contextPrompt = `
-Current Financial Snapshot:
-- Monthly Income: $${financialSnapshot.income}
-- Monthly Expenses: $${financialSnapshot.expenses}
-- Current Balance: $${financialSnapshot.balance}
+  const hasData = financialSnapshot.income > 0 || financialSnapshot.expenses > 0;
+  
+  const contextPrompt = hasData ? `
+User's Current Financial Snapshot:
+- Monthly Income: $${financialSnapshot.income.toLocaleString()}
+- Monthly Expenses: $${financialSnapshot.expenses.toLocaleString()}
+- Net Balance This Month: $${(financialSnapshot.income - financialSnapshot.expenses).toLocaleString()}
 - Savings Rate: ${financialSnapshot.savingsRate}%
 - Financial Health Score: ${financialSnapshot.healthScore}/100
-- Top Spending Categories: ${financialSnapshot.topCategories.map(c => `${c.category} ($${c.amount})`).join(', ')}
+${financialSnapshot.topCategories.length > 0 ? `- Top Spending: ${financialSnapshot.topCategories.slice(0, 3).map(c => `${c.category} ($${c.amount})`).join(', ')}` : '- No spending recorded yet this month'}
 
-User Question: ${userMessage}
+User Message: ${userMessage}
 
-Please provide a helpful, personalized response based on their financial situation.`;
+Respond naturally based on their message. If it's a greeting, be brief and friendly. If they ask about finances, give specific advice using their data.` 
+  : `
+User has no financial data recorded yet.
+
+User Message: ${userMessage}
+
+Respond helpfully. If they're new, encourage them to start adding transactions to get personalized insights.`;
 
   try {
     const messages = [
