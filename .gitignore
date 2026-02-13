@@ -32,7 +32,6 @@ server/prisma/*.db-journal
 coverage/
 .nyc_output/
 
-package-lock.json
 
 ARCHITECTURE.md
 BUDGET_LOGIC.md
