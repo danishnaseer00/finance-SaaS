@@ -49,6 +49,17 @@ const AIChat = () => {
     scrollToBottom();
   }, [messages]);
 
+  const handleClearChat = async () => {
+    try {
+      await aiService.clearChatHistory();
+      setMessages([]);
+      toast.success('Chat history cleared');
+    } catch (error) {
+      console.error('Failed to clear chat:', error);
+      toast.error('Failed to clear chat history');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
@@ -100,7 +111,7 @@ const AIChat = () => {
             </div>
             {messages.length > 0 && (
               <button
-                onClick={() => setMessages([])}
+                onClick={handleClearChat}
                 className="p-2 text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
                 title="Clear chat"
               >

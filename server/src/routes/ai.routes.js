@@ -12,5 +12,6 @@ router.post('/chat', validate(chatMessageSchema), aiController.chat);
 router.get('/insights', aiController.getInsights);
 router.get('/budget-plan', aiController.getBudgetPlan);
 router.get('/chat-history', aiController.getChatHistory);
+router.delete('/chat-history', aiController.clearChatHistory);
 
 module.exports = router;

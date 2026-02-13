@@ -99,9 +99,19 @@ const getChatHistory = async (req, res, next) => {
   }
 };
 
+const clearChatHistory = async (req, res, next) => {
+  try {
+    await aiService.clearChatHistory(req.user.id);
+    res.json({ message: 'Chat history cleared' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   chat,
   getInsights,
   getBudgetPlan,
   getChatHistory,
+  clearChatHistory,
 };

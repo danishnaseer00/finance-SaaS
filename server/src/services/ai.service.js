@@ -169,6 +169,15 @@ const getChatHistory = async (userId, limit = 20) => {
   });
 };
 
+const clearChatHistory = async (userId) => {
+  return prisma.aIInsight.deleteMany({
+    where: {
+      userId,
+      type: 'CHAT',
+    },
+  });
+};
+
 module.exports = {
   generateChatResponse,
   generateAutoInsights,
@@ -176,4 +185,5 @@ module.exports = {
   saveChatInsight,
   saveAutoInsight,
   getChatHistory,
+  clearChatHistory,
 };

@@ -32,6 +32,7 @@ export const aiService = {
   getInsights: () => api.get('/ai/insights'),
   getBudgetPlan: () => api.get('/ai/budget-plan'),
   getChatHistory: (limit = 20) => api.get('/ai/chat-history', { params: { limit } }),
+  clearChatHistory: () => api.delete('/ai/chat-history'),
 };
 
 export const budgetService = {
