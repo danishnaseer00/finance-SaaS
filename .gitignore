@@ -1,35 +1,38 @@
-# Dependencies
 node_modules/
 
-# Environment files
 .env
 .env.local
 .env.production
+.env.development
+.env.*.local
+server/.env
+client/.env
 .env.example
+server/.env.example
+client/.env.example
 
-# Build outputs
 dist/
 build/
 
-# Logs
 *.log
 npm-debug.log*
+yarn-error.log*
 
-# IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# OS
 .DS_Store
 Thumbs.db
 
-# Prisma
 server/prisma/*.db
 server/prisma/*.db-journal
 
-# Coverage
 coverage/
+.nyc_output/
 
-# markdownlint
+package-lock.json
+
 ARCHITECTURE.md
 BUDGET_LOGIC.md

@@ -1,8 +1,7 @@
 # FinSense - AI-Powered Financial Tracking
 
-A modern web application for personal finance tracking with AI-powered insights, built with React, Node.js, Express, PostgreSQL, and Google Gemini AI.
+A modern web application for personal finance tracking with AI-powered insights, built with React, Node.js, Express, PostgreSQL, and Openrouter.
 
-![FinSense](https://img.shields.io/badge/FinSense-Financial%20Tracking-22c55e)
 
 ## Features
 
@@ -28,7 +27,7 @@ A modern web application for personal finance tracking with AI-powered insights,
 - PostgreSQL with Prisma ORM
 - JWT Authentication
 - Zod validation
-- Google Gemini AI
+- Openrouter
 
 ## Prerequisites
 
@@ -63,8 +62,8 @@ DATABASE_URL="postgresql://username:password@localhost:5432/finsense?schema=publ
 JWT_SECRET="your-super-secret-jwt-key-change-in-production"
 JWT_EXPIRES_IN="7d"
 
-# Google Gemini AI
-GEMINI_API_KEY="your-gemini-api-key"
+# OPENROUTER_KEY
+
 
 # Server
 PORT=5000
@@ -96,12 +95,6 @@ npm run dev
 
 - Frontend: http://localhost:5173
 - Backend: http://localhost:5000
-
-### Demo Account
-
-After seeding, use these credentials:
-- Email: `demo@finsense.com`
-- Password: `demo123`
 
 ## Project Structure
 
@@ -153,12 +146,6 @@ finance-SaaS/
 - `GET /api/ai/insights` - Get AI insights
 - `GET /api/ai/budget-plan` - Generate budget plan
 - `GET /api/ai/chat-history` - Get chat history
-
-## Getting Gemini API Key
-
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Create a new API key
-3. Add it to your `.env` file
 
 ## License
 
